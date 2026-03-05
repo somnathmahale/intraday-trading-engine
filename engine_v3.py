@@ -29,7 +29,7 @@ def safe_download(ticker, period="5d", interval="5m"):
 # CONFIG
 # =============================
 # TICKERS = ["RELIANCE.NS", "ONGC.NS", "TATAMOTORS.NS", "INDIGO.NS", "ICICIBANK.NS"]
-TICKERS = ["RELIANCE.NS", "ONGC.NS", "INDIGO.NS", "ICICIBANK.NS"]
+TICKERS = ["RELIANCE.NS", "ONGC.NS", "INFY.NS", "INDIGO.NS", "ICICIBANK.NS"]
 
 INDEX_TICKER = "^NSEI"
 
@@ -130,6 +130,8 @@ def nifty_trend():
 def scan_market():
     global position, trades_today
 
+    trade_found = False
+
     if trades_today >= MAX_TRADES_PER_DAY:
         return
 
@@ -167,6 +169,7 @@ def scan_market():
 
         avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
         # --- DEBUG: explain why trade may be rejected ---
+        """
         price = latest["Close"]
         vwap = latest["VWAP"]
 
@@ -182,6 +185,7 @@ def scan_market():
             f"BuyBreak:{buy_break} SellBreak:{sell_break} "
             f"VWAPBuy:{vwap_buy_ok} VWAPSell:{vwap_sell_ok}"
         )
+        """
 
         if latest["Volume"] < VOL_MULTIPLIER * avg_vol:
             continue
@@ -204,6 +208,7 @@ def scan_market():
 
             if qty > 0:
                 create_position(ticker, "BUY", entry, stop, qty, risk)
+                trade_found = True
                 return
 
         # SELL CONDITION
@@ -222,7 +227,11 @@ def scan_market():
 
             if qty > 0:
                 create_position(ticker, "SELL", entry, stop, qty, risk)
+                trade_found = True
                 return
+
+    if not trade_found:
+        print("\nNO TRADE SIGNAL for today")
 
 
 # =============================
