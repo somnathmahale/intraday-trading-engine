@@ -166,6 +166,22 @@ def scan_market():
         latest = df.iloc[-1]
 
         avg_vol = df["Volume"].rolling(20).mean().iloc[-1]
+        # --- DEBUG: explain why trade may be rejected ---
+        price = latest["Close"]
+        vwap = latest["VWAP"]
+
+        buy_break = price > or_high
+        sell_break = price < or_low
+        vwap_buy_ok = price > vwap
+        vwap_sell_ok = price < vwap
+        vol_ok = latest["Volume"] >= VOL_MULTIPLIER * avg_vol
+
+        print(
+            f"{ticker} | Price:{price:.2f} ORH:{or_high:.2f} ORL:{or_low:.2f} "
+            f"VWAP:{vwap:.2f} VolOK:{vol_ok} "
+            f"BuyBreak:{buy_break} SellBreak:{sell_break} "
+            f"VWAPBuy:{vwap_buy_ok} VWAPSell:{vwap_sell_ok}"
+        )
 
         if latest["Volume"] < VOL_MULTIPLIER * avg_vol:
             continue
